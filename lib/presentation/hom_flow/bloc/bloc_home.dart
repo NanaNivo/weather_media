@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather/core/services/weather_processor_service.dart';
 import 'package:weather/presentation/hom_flow/bloc/event_home.dart';
 import 'package:weather/presentation/hom_flow/bloc/state_home.dart';
 import 'package:weather/presentation/hom_flow/usecase/usecase_get_location.dart';
@@ -36,29 +37,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       isLoading: true,
     ));
 
+    final result = await locationUseCase(NoParams());
+    if (result.hasDataOnly) {
+      final position = result.data!;
+      emit(state.copyWith(
+        status: WeatherStatus.locationLoaded,
+        position: position,
+        isLoading: false,
+      ));
 
-      final result = await locationUseCase(NoParams());
-      if (result.hasDataOnly) {
-        final position = result.data!;
-        emit(state.copyWith(
-          status: WeatherStatus.locationLoaded,
-          position: position,
-          isLoading: false,
-        ));
-
-        // Get nearby stations
-        add(GetNearbyStationsEvent(
-          latitude: position.latitude,
-          longitude: position.longitude,
-        ));
-      } else if (result.error != null) {
-        emit(state.copyWith(
-          status: WeatherStatus.error,
-          errorMessage: result.error!.toString(),
-          isLoading: false,
-        ));
-      }
-
+      // Get nearby stations
+      add(GetNearbyStationsEvent(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      ));
+    } else if (result.error != null) {
+      emit(state.copyWith(
+        status: WeatherStatus.error,
+        errorMessage: result.error!.toString(),
+        isLoading: false,
+      ));
+    }
   }
 
   Future<void> _onGetNearbyStations(
@@ -69,7 +68,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       status: WeatherStatus.loading,
       isLoading: true,
     ));
-
 
     final params = NearbyStationsParams(
       latitude: event.latitude,
@@ -82,7 +80,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     if (stationsResult.hasDataOnly) {
       final stations = stationsResult.data;
-      if (stations != null ) {
+      if (stations != null) {
         emit(state.copyWith(
           status: WeatherStatus.stationsLoaded,
           stations: stations,
@@ -110,11 +108,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-
-
-
-
-
   Future<void> _onGetStationWeather(
     GetStationWeatherEvent event,
     Emitter<HomeState> emit,
@@ -124,37 +117,37 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       isLoading: true,
     ));
 
-
-      final request = WeatherHourlyDailyRequest(
+    try {
+      // Use isolate for both fetching and processing
+      final result = await WeatherProcessorService.fetchAndProcessWeatherData(
         station: event.station,
-        start: DateFormat('yyyy-MM-dd').format(event.startDate),
-        end: DateFormat('yyyy-MM-dd').format(event.endDate),
+        startDate: event.startDate,
+        endDate: event.endDate,
+        dailyUseCase: weatherDailyUseCase,
+        hourlyUseCase: weatherHourlyUseCase,
       );
 
-      // Get daily weather data
-      final dailyResult = await weatherDailyUseCase(WeatherDailyParams(
-        request: request,
-      ));
-
-      // Get hourly weather data
-      final hourlyResult = await weatherHourlyUseCase(WeatherHourlyParams(
-        request: request,
-      ));
-
-      if (dailyResult.hasDataOnly || hourlyResult.hasDataOnly) {
-        emit(state.copyWith(
-          status: WeatherStatus.weatherLoaded,
-          dailyData: dailyResult.data,
-          hourlyData: hourlyResult.data,
-          isLoading: false,
-        ));
-      } else {
+      if (result['hasError'] == true) {
         emit(state.copyWith(
           status: WeatherStatus.error,
-          errorMessage: 'Failed to get weather data',
+          errorMessage: result['error'] as String,
           isLoading: false,
         ));
+        return;
       }
 
+      emit(state.copyWith(
+        status: WeatherStatus.weatherLoaded,
+        dailyData: result['daily']?['data'],
+        hourlyData: result['hourly']?['data'],
+        isLoading: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: WeatherStatus.error,
+        errorMessage: 'Error: ${e.toString()}',
+        isLoading: false,
+      ));
+    }
   }
 }

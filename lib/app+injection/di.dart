@@ -67,8 +67,8 @@ Future<void> setUpLocator() async {
 
   // Register Network Components
   locator.registerFactory<Dio>(() => Dio());
-  locator.registerLazySingleton<AuthInterceptor>(
-      () => AuthInterceptor(locator<SessionManager>(), locator<Dio>()));
+  // locator.registerLazySingleton<AuthInterceptor>(
+  //     () => AuthInterceptor(locator<SessionManager>(), locator<Dio>()));
 
   // Register Data Sources
   locator.registerLazySingleton(() => DataSourceHomeImp());

@@ -1,157 +1,218 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:weather/app+injection/di.dart';
-import 'package:weather/core/blocs/application_bloc/app_bloc.dart';
-import 'package:weather/core/localization/app_lang.dart';
 import 'package:weather/core/resources/colors.dart';
 import 'package:weather/core/resources/constants.dart';
 import 'package:weather/presentation/custom_widgets/text_translation.dart';
 
 class WeatherSetting extends StatelessWidget {
-  const WeatherSetting({super.key});
+  const WeatherSetting({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AppBloc, AppState>(
-      bloc: locator<AppBloc>(),
-      builder: (context, state) {
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: ScreenUtil().setWidth(20),
-            vertical: ScreenUtil().setHeight(20),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Language Settings
-              Container(
-                padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
-                decoration: BoxDecoration(
-                  color: locator<AppThemeColors>().ContainerColor,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                      offset: const Offset(0, 3),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            locator<AppThemeColors>().primaryColor.withOpacity(0.8),
+            locator<AppThemeColors>().backgroundColor,
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Settings',
+                    style: TextStyle(
+                      color: locator<AppThemeColors>().white,
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextTranslation(
-                      TranslationsKeys.Language,
-                      style: TextStyle(
-                        fontSize: ScreenUtil().setSp(50),
-                        fontWeight: FontWeight.bold,
-                        color: locator<AppThemeColors>().textBlack,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  ),
+                  SizedBox(height: 20.h),
+                  // Language Settings
+                  _buildSettingsCard(
+                    title: 'Language',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildLanguageButton(
                           context: context,
-                          language: AppLanguages.en,
-                          currentLanguage: state.language,
-                          label: TranslationsKeys.EN,
+                          language: 'EN',
+                          isSelected: true,
                         ),
                         _buildLanguageButton(
                           context: context,
-                          language: AppLanguages.ar,
-                          currentLanguage: state.language,
-                          label: TranslationsKeys.AR,
+                          language: 'AR',
+                          isSelected: false,
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 16.h),
+                  // Temperature Unit Settings
+                  _buildSettingsCard(
+                    title: 'Temperature Unit',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildUnitButton(
+                          context: context,
+                          unit: '°C',
+                          isSelected: true,
+                        ),
+                        _buildUnitButton(
+                          context: context,
+                          unit: '°F',
+                          isSelected: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  // Theme Settings
+                  _buildSettingsCard(
+                    title: 'Theme',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildThemeButton(
+                          context: context,
+                          theme: 'Light',
+                          icon: Icons.light_mode,
+                          isSelected: true,
+                        ),
+                        _buildThemeButton(
+                          context: context,
+                          theme: 'Dark',
+                          icon: Icons.dark_mode,
+                          isSelected: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: ScreenUtil().setHeight(20)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              // Theme Settings
-              Container(
-                padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
-                decoration: BoxDecoration(
-                  color: locator<AppThemeColors>().ContainerColor,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextTranslation(
-                      TranslationsKeys.Them,
-                      style: TextStyle(
-                        fontSize: ScreenUtil().setSp(50),
-                        fontWeight: FontWeight.bold,
-                        color: locator<AppThemeColors>().textBlack,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildThemeButton(
-                          context: context,
-                          mode: AppThemeMode.light,
-                          currentMode: state.appThemeMode,
-                          label: TranslationsKeys.light,
-                        ),
-                        _buildThemeButton(
-                          context: context,
-                          mode: AppThemeMode.dark,
-                          currentMode: state.appThemeMode,
-                          label: TranslationsKeys.Dark,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+  Widget _buildSettingsCard({required String title, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: locator<AppThemeColors>().white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
-        );
-      },
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: locator<AppThemeColors>().black,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          child,
+        ],
+      ),
     );
   }
 
   Widget _buildLanguageButton({
     required BuildContext context,
-    required AppLanguages language,
-    required AppLanguages currentLanguage,
-    required String label,
+    required String language,
+    required bool isSelected,
   }) {
-    final isSelected = language == currentLanguage;
-    return TextButton(
-      onPressed: () {
-        context.read<AppBloc>().add(AppLanguageEvent(language));
+    return InkWell(
+      onTap: () {
+        // Handle language selection
       },
-      style: TextButton.styleFrom(
-        backgroundColor: isSelected
-            ? locator<AppThemeColors>().lightblue
-            : locator<AppThemeColors>().ContainerColor,
+      child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: ScreenUtil().setWidth(40),
-          vertical: ScreenUtil().setHeight(12),
+          horizontal: 32.w,
+          vertical: 12.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? locator<AppThemeColors>().primaryColor
+              : locator<AppThemeColors>().white,
+          borderRadius: BorderRadius.circular(30.r),
+          border: Border.all(
+            color: locator<AppThemeColors>().primaryColor,
+            width: 2,
+          ),
+        ),
+        child: Text(
+          language,
+          style: TextStyle(
+            color: isSelected
+                ? locator<AppThemeColors>().white
+                : locator<AppThemeColors>().primaryColor,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      child: TextTranslation(
-        label,
-        style: TextStyle(
-          color: locator<AppThemeColors>().textBlack,
-          fontSize: ScreenUtil().setSp(40),
+    );
+  }
+
+  Widget _buildUnitButton({
+    required BuildContext context,
+    required String unit,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: () {
+        // Handle unit selection
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 32.w,
+          vertical: 12.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? locator<AppThemeColors>().primaryColor
+              : locator<AppThemeColors>().white,
+          borderRadius: BorderRadius.circular(30.r),
+          border: Border.all(
+            color: locator<AppThemeColors>().primaryColor,
+            width: 2,
+          ),
+        ),
+        child: Text(
+          unit,
+          style: TextStyle(
+            color: isSelected
+                ? locator<AppThemeColors>().white
+                : locator<AppThemeColors>().primaryColor,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -159,29 +220,51 @@ class WeatherSetting extends StatelessWidget {
 
   Widget _buildThemeButton({
     required BuildContext context,
-    required AppThemeMode mode,
-    required AppThemeMode currentMode,
-    required String label,
+    required String theme,
+    required IconData icon,
+    required bool isSelected,
   }) {
-    final isSelected = mode == currentMode;
-    return TextButton(
-      onPressed: () {
-        context.read<AppBloc>().add(AppThemeModeEvent(appThemeMode: mode));
+    return InkWell(
+      onTap: () {
+        // Handle theme selection
       },
-      style: TextButton.styleFrom(
-        backgroundColor: isSelected
-            ? locator<AppThemeColors>().lightblue
-            : locator<AppThemeColors>().ContainerColor,
+      child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: ScreenUtil().setWidth(40),
-          vertical: ScreenUtil().setHeight(12),
+          horizontal: 24.w,
+          vertical: 12.h,
         ),
-      ),
-      child: TextTranslation(
-        label,
-        style: TextStyle(
-          color: locator<AppThemeColors>().textBlack,
-          fontSize: ScreenUtil().setSp(40),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? locator<AppThemeColors>().primaryColor
+              : locator<AppThemeColors>().white,
+          borderRadius: BorderRadius.circular(30.r),
+          border: Border.all(
+            color: locator<AppThemeColors>().primaryColor,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? locator<AppThemeColors>().white
+                  : locator<AppThemeColors>().primaryColor,
+              size: 20.w,
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              theme,
+              style: TextStyle(
+                color: isSelected
+                    ? locator<AppThemeColors>().white
+                    : locator<AppThemeColors>().primaryColor,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

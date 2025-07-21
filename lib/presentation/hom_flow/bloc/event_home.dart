@@ -1,29 +1,49 @@
-import 'package:weather/presentation/hom_flow/bloc/state_home.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class HomeEvent {}
+abstract class HomeEvent extends Equatable {
+  const HomeEvent();
 
-class GetMyLocationEvent extends HomeEvent {}
+  @override
+  List<Object?> get props => [];
+}
+
+class GetWeatherDataEvent extends HomeEvent {
+  final String location;
+
+  const GetWeatherDataEvent({required this.location});
+
+  @override
+  List<Object?> get props => [location];
+}
+
+class GetMyLocationEvent extends HomeEvent {
+  const GetMyLocationEvent();
+}
 
 class GetNearbyStationsEvent extends HomeEvent {
   final double latitude;
   final double longitude;
 
-  GetNearbyStationsEvent({
+  const GetNearbyStationsEvent({
     required this.latitude,
     required this.longitude,
   });
+
+  @override
+  List<Object?> get props => [latitude, longitude];
 }
 
 class GetStationWeatherEvent extends HomeEvent {
-  final String station; // Station ID
+  final String station;
   final DateTime startDate;
   final DateTime endDate;
-  final String? language;
 
-  GetStationWeatherEvent({
+  const GetStationWeatherEvent({
     required this.station,
     required this.startDate,
     required this.endDate,
-    this.language,
   });
+
+  @override
+  List<Object?> get props => [station, startDate, endDate];
 }

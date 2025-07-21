@@ -1,7 +1,8 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:weather/core/error/custom_error.dart';
-import 'package:weather/core/result/result.dart';
+
 import 'package:weather/core/error/base_error.dart';
+import 'package:weather/core/result/result.dart';
 
 class LocationService {
   static final LocationService _instance = LocationService._internal();
@@ -18,7 +19,8 @@ class LocationService {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         return Result(
-            error: CustomError(
+
+           error:  CustomError(
                 message:
                     'Location services are disabled. Please enable them in your device settings.'));
       }

@@ -1,5 +1,3 @@
 import 'package:equatable/equatable.dart';
 
-abstract class BaseError extends Equatable {
-
-}
+abstract class BaseError extends Equatable {}

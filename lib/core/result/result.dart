@@ -1,12 +1,10 @@
-
-
 import '../error/base_error.dart';
 
-class Result<E extends BaseError, D>{
+class Result<E extends BaseError, D> {
   final E? error;
   final D? data;
 
-  Result({this.data, this.error}){
+  Result({this.data, this.error}) {
     assert(data != null || error != null);
   }
 
@@ -15,5 +13,4 @@ class Result<E extends BaseError, D>{
   bool get hasDataOnly => data != null && error == null;
 
   bool get hasErrorOnly => data == null;
-
 }
